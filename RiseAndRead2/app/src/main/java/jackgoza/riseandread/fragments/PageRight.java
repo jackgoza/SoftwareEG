@@ -1,6 +1,5 @@
 package jackgoza.riseandread.fragments;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -68,6 +67,7 @@ public class PageRight extends Fragment {
         return inflater.inflate(R.layout.fragment_page_right, container, false);
     }
 
+    /*
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -85,6 +85,7 @@ public class PageRight extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
+    */
 
     @Override
     public void onDetach() {
