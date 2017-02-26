@@ -1,28 +1,20 @@
 package jackgoza.riseandread;
 
 import android.net.Uri;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
-import android.widget.TextView;
+import jackgoza.riseandread.fragments.AlarmFragment;
+import jackgoza.riseandread.fragments.PageRight;
 
-import jackgoza.riseandread.fragments.PlaceholderFragment;
-import jackgoza.riseandread.fragments.landing;
-
-public class MainActivity extends AppCompatActivity implements landing.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements AlarmFragment.OnFragmentInteractionListener{
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -98,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements landing.OnFragmen
         System.out.println("touched");
     }
 
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -117,7 +110,11 @@ public class MainActivity extends AppCompatActivity implements landing.OnFragmen
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return new landing().newInstance(null,null);
+            switch (position){
+                case 0: return new AlarmFragment().newInstance(null,null);
+                case 1: return new PageRight().newInstance(null,null);
+                default: return new AlarmFragment().newInstance(null,null);
+            }
         }
 
         @Override
