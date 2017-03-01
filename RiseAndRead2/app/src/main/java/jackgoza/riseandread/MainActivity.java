@@ -1,5 +1,9 @@
 package jackgoza.riseandread;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -7,9 +11,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ToggleButton;
+
+import java.util.Calendar;
 
 import jackgoza.riseandread.fragments.AlarmFragment;
 import jackgoza.riseandread.fragments.PageRight;
@@ -25,14 +33,17 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    MainActivity inst = this;
 
     /**
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private AlarmManager alarmManager;
+    private PendingIntent pendingIntent;
 
-    public void add_new_alarm(View view){
-
+    public MainActivity instance() {
+        return inst;
     }
 
     @Override
@@ -44,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -86,15 +98,24 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
     }
 
 
-    public void onFragmentInteraction(Uri uri){
-        System.out.println("touched");
+    public void onFragmentInteraction(int hour, int minute, boolean buttonState){
+
+            if (buttonState) {
+                Log.d("MyActivity", "Alarm On");
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.HOUR_OF_DAY, hour);
+                calendar.set(Calendar.MINUTE, minute);
+                Intent myIntent = new Intent(MainActivity.this, AlarmReceiver.class);
+                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
+                alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+            } else {
+                alarmManager.cancel(pendingIntent);
+                Log.d("MyActivity", "Alarm Off");
+            }
+
     }
 
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-   
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
