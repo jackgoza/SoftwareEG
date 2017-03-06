@@ -21,8 +21,10 @@ import java.util.Calendar;
 
 import jackgoza.riseandread.fragments.AlarmFragment;
 import jackgoza.riseandread.fragments.PageRight;
+import jackgoza.riseandread.fragments.PlaceholderFragment;
 
-public class MainActivity extends AppCompatActivity implements AlarmFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements AlarmFragment.OnFragmentInteractionListener,
+        PageRight.OnFragmentInteractionListener{
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -102,17 +104,23 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
 
             if (buttonState) {
                 Log.d("MyActivity", "Alarm On");
+
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(Calendar.HOUR_OF_DAY, hour);
                 calendar.set(Calendar.MINUTE, minute);
+                calendar.add(Calendar.SECOND, 10);
                 Intent myIntent = new Intent(MainActivity.this, AlarmReceiver.class);
                 pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
-                alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+                alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
             } else {
                 alarmManager.cancel(pendingIntent);
                 Log.d("MyActivity", "Alarm Off");
             }
 
+    }
+
+    public void onPageRightInteraction(Uri uri){
+        return;
     }
 
 
@@ -123,6 +131,10 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        AlarmFragment alarmFragment = AlarmFragment.newInstance(null,null);
+        PageRight pageRight = PageRight.newInstance(null,null);
+        PlaceholderFragment placeHolder = PlaceholderFragment.newInstance(3);
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -132,9 +144,9 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             switch (position){
-                case 0: return new AlarmFragment().newInstance(null,null);
-                case 1: return new PageRight().newInstance(null,null);
-                default: return new AlarmFragment().newInstance(null,null);
+                case 0: return alarmFragment;
+                case 1: return pageRight;
+                default: return placeHolder;
             }
         }
 

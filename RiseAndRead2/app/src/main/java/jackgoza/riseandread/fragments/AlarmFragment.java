@@ -75,19 +75,19 @@ public class AlarmFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        View InputFragmentView = inflater.inflate(R.layout.alarm_fragment, container, false);
+        View alarmFragmentView = inflater.inflate(R.layout.alarm_fragment, container, false);
 
 
 
-        alarmTimePicker = (TimePicker) InputFragmentView.findViewById(R.id.timePicker);
-        alarmToggle = (ToggleButton) InputFragmentView.findViewById(R.id.alarmToggle);
+        alarmTimePicker = (TimePicker) alarmFragmentView.findViewById(R.id.timePicker);
+        alarmToggle = (ToggleButton) alarmFragmentView.findViewById(R.id.alarmToggle);
         alarmToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onButtonPressed();
             }
         });
-        return InputFragmentView;
+        return alarmFragmentView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
