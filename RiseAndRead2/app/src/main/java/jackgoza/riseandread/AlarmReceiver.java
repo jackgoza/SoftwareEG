@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.provider.Settings;
 import android.support.v4.content.WakefulBroadcastReceiver;
+import android.widget.Toast;
 
 public class AlarmReceiver extends WakefulBroadcastReceiver {
 
@@ -25,9 +27,8 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         ringtone.play();
 
         //this will send a notification message
-        ComponentName comp = new ComponentName(context.getPackageName(),
-                AlarmService.class.getName());
-        startWakefulService(context, (intent.setComponent(comp)));
+        Toast.makeText(context, "ALARM!", Toast.LENGTH_LONG).show();
+
         setResultCode(Activity.RESULT_OK);
     }
 }
