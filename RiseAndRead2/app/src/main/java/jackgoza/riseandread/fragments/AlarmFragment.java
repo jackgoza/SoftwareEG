@@ -2,20 +2,14 @@ package jackgoza.riseandread.fragments;
 
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.app.AlarmManager;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
-
-import java.util.Calendar;
 
 import jackgoza.riseandread.R;
 
@@ -84,14 +78,14 @@ public class AlarmFragment extends Fragment {
         alarmToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onButtonPressed();
+                onAlarmButtonPressed();
             }
         });
         return alarmFragmentView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed() {
+    public void onAlarmButtonPressed() {
         if (mListener != null) {
             int hour = alarmTimePicker.getHour();
             int minute = alarmTimePicker.getMinute();

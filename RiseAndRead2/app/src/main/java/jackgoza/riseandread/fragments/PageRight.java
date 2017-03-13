@@ -6,11 +6,22 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.util.HashMap;
+
+import jackgoza.riseandread.models.JumpItem;
 
 import jackgoza.riseandread.R;
 
@@ -27,12 +38,13 @@ public class PageRight extends Fragment {
     private static ListView listHolder;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    String[] displayArray = {"NYT", "CNET", "Gizmodo", "CNN"};
-    String[] linkArray = {"NYT", "CNET", "Gizmodo", "CNN"};
+    private static JumpItem jumpItemArray;
+    private static HashMap<String,String> linkHash = new HashMap<>();
+    private static String[] displayArray = {"NYT", "CNET", "Gizmodo", "Imgur"};
+    private static String[] linkArray = {"www.nytimes.com", "www.cnet.com", "www.gizmodo.com", "Imgur"};
 
     // TODO: Rename and change types of parameters
     private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
@@ -41,11 +53,21 @@ public class PageRight extends Fragment {
     }
 
 
-    public static PageRight newInstance(String param1, String param2) {
+    public static PageRight newInstance(JSONArray jsonArray) {
         PageRight fragment = new PageRight();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        if(jsonArray == null){
+            jsonArray = new JSONArray();
+            for (int i =0; i < displayArray.length; i++){
+                linkHash.put(displayArray[i],linkArray[i]);
+            }
+        }
+        else{
+            linkHash = new Gson().fromJson(
+                    jsonArray.toString(), new TypeToken<HashMap<String, String>>() {}.getType()
+            );
+        }
+        args.putString(ARG_PARAM1, jsonArray.toString());
         fragment.setArguments(args);
         return fragment;
     }
@@ -54,8 +76,13 @@ public class PageRight extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            try {
+                mParam1 = getArguments().getString(ARG_PARAM1);
+                JSONArray jsonArray = new JSONArray(mParam1);
+            } catch (JSONException e) {
+                Log.e(e.toString(),e.getMessage());
+                throw new RuntimeException("JSON borked. Way to serialize bro.");
+            }
         }
 
     }
@@ -66,7 +93,7 @@ public class PageRight extends Fragment {
         View pageRightView = inflater.inflate(R.layout.fragment_page_right, container, false);
 
         listHolder = (ListView) pageRightView.findViewById(R.id.listHolder);
-        ArrayAdapter adapter = new ArrayAdapter<String>(this.getContext(),
+        ArrayAdapter adapter = new ArrayAdapter<>(this.getContext(),
                 R.layout.fragment_page_right, R.id.listText, displayArray);
         listHolder.setAdapter(adapter);
 

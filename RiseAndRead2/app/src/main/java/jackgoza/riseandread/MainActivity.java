@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ToggleButton;
+
+import org.json.JSONArray;
 
 import java.util.Calendar;
 
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
     private ViewPager mViewPager;
     private AlarmManager alarmManager;
     private PendingIntent pendingIntent;
+    private JSONArray linkArray;
 
     public MainActivity instance() {
         return inst;
@@ -56,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(),linkArray);
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
         // Set up the ViewPager with the sections adapter.
@@ -108,9 +112,9 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(Calendar.HOUR_OF_DAY, hour);
                 calendar.set(Calendar.MINUTE, minute);
-                calendar.add(Calendar.SECOND, 10);
+                calendar.add(Calendar.SECOND, 5);
                 Intent myIntent = new Intent(MainActivity.this, AlarmReceiver.class);
-                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
+                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
             } else {
                 alarmManager.cancel(pendingIntent);
@@ -131,12 +135,17 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        private JSONArray linkArray;
+
         AlarmFragment alarmFragment = AlarmFragment.newInstance(null,null);
-        PageRight pageRight = PageRight.newInstance(null,null);
+
+        PageRight pageRight = PageRight.newInstance(linkArray);
+
         PlaceholderFragment placeHolder = PlaceholderFragment.newInstance(3);
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        public SectionsPagerAdapter(FragmentManager fm, JSONArray inputArray) {
             super(fm);
+            linkArray = inputArray;
         }
 
         @Override
