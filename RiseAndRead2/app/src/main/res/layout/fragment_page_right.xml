@@ -9,9 +9,14 @@
     <!-- TODO: Update blank fragment layout -->
 
     <ListView
+        android:id="@+id/listHolder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/listHolder" />
+        android:divider="?android:attr/dividerHorizontal"
+        android:dividerHeight="@dimen/activity_horizontal_margin"
+        android:footerDividersEnabled="true"
+        android:headerDividersEnabled="false"
+        android:visibility="visible" />
 
     <EditText
         android:layout_width="wrap_content"

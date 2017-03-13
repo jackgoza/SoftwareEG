@@ -6,4 +6,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="pageRightText">Right!</string>
+    <string name="title_activity_alarm_splash">AlarmSplash</string>
+    <string name="it_s_now">It\'s now</string>
+    <string name="turn_off_alarm">Turn Off Alarm</string>
+    <string name="and_this_is_your_alarm">and this is your alarm.</string>
 </resources>
