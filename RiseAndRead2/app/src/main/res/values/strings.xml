@@ -10,4 +10,6 @@
     <string name="it_s_now">It\'s now</string>
     <string name="turn_off_alarm">Turn Off Alarm</string>
     <string name="and_this_is_your_alarm">and this is your alarm.</string>
+    <string name="here_are_your_configured_shortcuts">Here are your configured shortcuts:</string>
+    <string name="alarm_on_off">Set Alarm</string>
 </resources>

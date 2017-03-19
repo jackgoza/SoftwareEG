@@ -5,13 +5,16 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +24,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
 
+import jackgoza.riseandread.models.CustomAdapter;
 import jackgoza.riseandread.models.JumpItem;
 
 import jackgoza.riseandread.R;
@@ -35,13 +39,15 @@ import jackgoza.riseandread.R;
  */
 public class PageRight extends Fragment {
 
-    private static ListView listHolder;
+    private ListView listHolder;
+    private FloatingActionButton fab;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static JumpItem jumpItemArray;
     private static HashMap<String,String> linkHash = new HashMap<>();
     private static String[] displayArray = {"NYT", "CNET", "Gizmodo", "Imgur"};
-    private static String[] linkArray = {"www.nytimes.com", "www.cnet.com", "www.gizmodo.com", "Imgur"};
+    private static String[] linkArray = {"www.nytimes.com", "www.cnet.com", "www.gizmodo.com", "com.imgur.mobile"};
+    private static int[] images = {R.mipmap.nyt, R.mipmap.cnet, R.mipmap.gizmodo, R.mipmap.imgur};
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -56,18 +62,7 @@ public class PageRight extends Fragment {
     public static PageRight newInstance(JSONArray jsonArray) {
         PageRight fragment = new PageRight();
         Bundle args = new Bundle();
-        if(jsonArray == null){
-            jsonArray = new JSONArray();
-            for (int i =0; i < displayArray.length; i++){
-                linkHash.put(displayArray[i],linkArray[i]);
-            }
-        }
-        else{
-            linkHash = new Gson().fromJson(
-                    jsonArray.toString(), new TypeToken<HashMap<String, String>>() {}.getType()
-            );
-        }
-        args.putString(ARG_PARAM1, jsonArray.toString());
+        createHash(jsonArray);
         fragment.setArguments(args);
         return fragment;
     }
@@ -76,13 +71,7 @@ public class PageRight extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            try {
                 mParam1 = getArguments().getString(ARG_PARAM1);
-                JSONArray jsonArray = new JSONArray(mParam1);
-            } catch (JSONException e) {
-                Log.e(e.toString(),e.getMessage());
-                throw new RuntimeException("JSON borked. Way to serialize bro.");
-            }
         }
 
     }
@@ -93,10 +82,32 @@ public class PageRight extends Fragment {
         View pageRightView = inflater.inflate(R.layout.fragment_page_right, container, false);
 
         listHolder = (ListView) pageRightView.findViewById(R.id.listHolder);
-        ArrayAdapter adapter = new ArrayAdapter<>(this.getContext(),
-                R.layout.fragment_page_right, R.id.listText, displayArray);
+        CustomAdapter adapter = new CustomAdapter(this.getContext(),
+                displayArray, images);
         listHolder.setAdapter(adapter);
+        listHolder.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                String launchString = linkArray[position];
+                if(launchString.startsWith("www") || launchString.startsWith("http")){
+                    launchWebsite(launchString);
+                }
+                else if(launchString.startsWith("com")){
+                    launchThirdPartyApp(getContext(),launchString);
+                }
+                else{
+                    Toast.makeText(getContext(),"Bad link! Please reconfigure",Toast.LENGTH_LONG);
+                }
+            }
+        });
 
+        fab = (FloatingActionButton) pageRightView.findViewById(R.id.addShortcutButton);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
 
         // Inflate the layout for this fragment
         return pageRightView;
@@ -123,7 +134,8 @@ public class PageRight extends Fragment {
     }
 
     private void launchWebsite(String url) {
-
+        if (!url.startsWith("http://") && !url.startsWith("https://"))
+            url = "http://" + url;
 
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 
@@ -151,6 +163,20 @@ public class PageRight extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public static void createHash(JSONArray jsonArray){
+        if(jsonArray == null){
+            jsonArray = new JSONArray();
+            for (int i =0; i < displayArray.length; i++){
+                linkHash.put(displayArray[i],linkArray[i]);
+            }
+        }
+        else{
+            linkHash = new Gson().fromJson(
+                    jsonArray.toString(), new TypeToken<HashMap<String, String>>() {}.getType()
+            );
+        }
     }
 
     /**

@@ -28,8 +28,7 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         Ringtone ringtone = RingtoneManager.getRingtone(context, alarmUri);
         ringtone.play();
 
-
-        intent.setClass(context, AlarmSplash.class); //Test is a dummy class name where to redirect
+        intent.setClass(context, AlarmSplash.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
 

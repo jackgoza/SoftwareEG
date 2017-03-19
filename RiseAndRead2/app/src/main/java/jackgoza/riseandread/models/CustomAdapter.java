@@ -62,6 +62,7 @@ public class CustomAdapter extends BaseAdapter{
         holder.img=(ImageView) rowView.findViewById(R.id.customListImage);
         holder.tv.setText(result[position]);
         holder.img.setImageResource(imageId[position]);
+        /*
         rowView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,6 +70,7 @@ public class CustomAdapter extends BaseAdapter{
                 Toast.makeText(context, "You Clicked "+result[position], Toast.LENGTH_LONG).show();
             }
         });
+        */
         return rowView;
     }
 
