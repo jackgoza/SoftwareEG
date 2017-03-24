@@ -82,6 +82,7 @@ public class PageRight extends Fragment {
             } catch (JSONException e) {
                 Log.e(e.toString(),e.getMessage());
                 throw new RuntimeException("JSON borked. Way to serialize bro.");
+                // lol nice error catch -BS
             }
         }
 
@@ -121,7 +122,7 @@ public class PageRight extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
-
+// nice, did not realize how simple it was to launch a web browser intent with a given url -BS
     private void launchWebsite(String url) {
 
 
@@ -129,7 +130,7 @@ public class PageRight extends Fragment {
 
         startActivity(browserIntent);
     }
-
+    // is this used for Imgur? i noticed in the lists up top Imgur is the only item not listed as the url of the site -BS
     public boolean launchThirdPartyApp(Context context, String packageName) {
         PackageManager manager = context.getPackageManager();
         try {
