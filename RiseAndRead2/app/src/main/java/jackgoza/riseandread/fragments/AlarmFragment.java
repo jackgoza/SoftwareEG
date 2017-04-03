@@ -26,16 +26,13 @@ public class AlarmFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
+    private static AlarmFragment inst;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     private OnFragmentInteractionListener mListener;
-
     private PendingIntent pendingIntent;
     private TimePicker alarmTimePicker;
-    private static AlarmFragment inst;
     private TextView alarmTextView;
     private ToggleButton alarmToggle;
 
@@ -72,7 +69,6 @@ public class AlarmFragment extends Fragment {
         View alarmFragmentView = inflater.inflate(R.layout.alarm_fragment, container, false);
 
 
-
         alarmTimePicker = (TimePicker) alarmFragmentView.findViewById(R.id.timePicker);
         alarmToggle = (ToggleButton) alarmFragmentView.findViewById(R.id.alarmToggle);
         alarmToggle.setOnClickListener(new View.OnClickListener() {
@@ -90,10 +86,9 @@ public class AlarmFragment extends Fragment {
             int hour = alarmTimePicker.getHour();
             int minute = alarmTimePicker.getMinute();
             boolean checked = alarmToggle.isChecked();
-            mListener.onFragmentInteraction(hour,minute,checked);
+            mListener.onFragmentInteraction(hour, minute, checked);
         }
     }
-
 
 
     public void setAlarmText(String alarmText) {

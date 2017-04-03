@@ -4,7 +4,6 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,12 +14,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.ToggleButton;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Calendar;
 
 import jackgoza.riseandread.fragments.AlarmFragment;
@@ -28,8 +32,9 @@ import jackgoza.riseandread.fragments.PageRight;
 import jackgoza.riseandread.fragments.PlaceholderFragment;
 
 public class MainActivity extends AppCompatActivity implements AlarmFragment.OnFragmentInteractionListener,
-        PageRight.OnFragmentInteractionListener{
+        PageRight.OnFragmentInteractionListener {
 
+    MainActivity inst = this;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -39,8 +44,6 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
-    MainActivity inst = this;
-
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -61,29 +64,62 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(),linkArray);
+
+        String fakeIt = "[{\"itemType\":\"WEBSITE\",\"jumpURI\":\"www.cnet.com\",\"prettyName\":\"CNET\"},{\"itemType\":\"WEBSITE\",\"jumpURI\":\"www.gizmodo.com\",\"prettyName\":\"Gizmodo\"},{\"itemType\":\"MOBILE_APPLICATION\",\"jumpURI\":\"com.imgur.mobile\",\"prettyName\":\"Imgur\"}]";
+
+        File directory;
+        directory = getApplicationContext().getFilesDir();
+
+        File[] files = directory.listFiles();
+
+        /*
+        String filePath = getApplicationContext().getFilesDir().getPath().toString() + "/user_preferences";
+        File f = new File(filePath);
+
+
+        try {
+            f.delete();
+            f.createNewFile();
+            FileOutputStream fout = new FileOutputStream(f);
+            ObjectOutputStream oout = new ObjectOutputStream(fout);
+            oout.writeObject(fakeIt);
+            fout.close();
+        } catch (Exception e){
+            throw new RuntimeException("SHIT");
+        }
+*/
+
+
+        if (files.length == 0) {
+            try {
+                String filePath = getApplicationContext().getFilesDir().getPath().toString() + "/user_preferences";
+                File f = new File(filePath);
+                f.createNewFile();
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                File fileIn = files[0];
+                FileInputStream fin = new FileInputStream(fileIn);
+                ObjectInputStream ois = new ObjectInputStream(fin);
+                String intakeString = (String) ois.readObject();
+                linkArray = new JSONArray(intakeString);
+            } catch (IOException | ClassNotFoundException | JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), linkArray);
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        View view = this.getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        }
-
-        /*
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        */
 
     }
 
@@ -111,29 +147,28 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
     }
 
 
-    public void onFragmentInteraction(int hour, int minute, boolean buttonState){
+    public void onFragmentInteraction(int hour, int minute, boolean buttonState) {
 
-            if (buttonState) {
-                Log.d("MyActivity", "Alarm On");
+        if (buttonState) {
+            Log.d("MyActivity", "Alarm On");
 
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.HOUR_OF_DAY, hour);
-                calendar.set(Calendar.MINUTE, minute);
-                calendar.add(Calendar.SECOND, 5);
-                Intent myIntent = new Intent(MainActivity.this, AlarmReceiver.class);
-                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-            } else {
-                alarmManager.cancel(pendingIntent);
-                Log.d("MyActivity", "Alarm Off");
-            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, hour);
+            calendar.set(Calendar.MINUTE, minute);
+            calendar.add(Calendar.SECOND, 5);
+            Intent myIntent = new Intent(MainActivity.this, AlarmReceiver.class);
+            pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        } else {
+            alarmManager.cancel(pendingIntent);
+            Log.d("MyActivity", "Alarm Off");
+        }
 
     }
 
-    public void onPageRightInteraction(Uri uri){
+    public void onPageRightInteraction(Uri uri) {
         return;
     }
-
 
 
     /**
@@ -142,14 +177,10 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        private JSONArray linkArray;
-
-
-        AlarmFragment alarmFragment = AlarmFragment.newInstance(null,null);
-
-        PageRight pageRight = PageRight.newInstance(linkArray);
-
+        AlarmFragment alarmFragment = AlarmFragment.newInstance(null, null);
         PlaceholderFragment placeHolder = PlaceholderFragment.newInstance(3);
+        private JSONArray linkArray;
+        PageRight pageRight = PageRight.newInstance(linkArray);
 
         public SectionsPagerAdapter(FragmentManager fm, JSONArray inputArray) {
             super(fm);
@@ -160,10 +191,13 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            switch (position){
-                case 0: return alarmFragment;
-                case 1: return pageRight;
-                default: return placeHolder;
+            switch (position) {
+                case 0:
+                    return alarmFragment;
+                case 1:
+                    return pageRight;
+                default:
+                    return placeHolder;
             }
         }
 
@@ -185,7 +219,6 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
             }
             return null;
         }
-
 
 
     }

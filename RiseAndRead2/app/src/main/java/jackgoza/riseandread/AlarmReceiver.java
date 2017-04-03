@@ -1,16 +1,12 @@
 package jackgoza.riseandread;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.provider.Settings;
 import android.support.v4.content.WakefulBroadcastReceiver;
-import android.widget.Toast;
 
 public class AlarmReceiver extends WakefulBroadcastReceiver {
 
