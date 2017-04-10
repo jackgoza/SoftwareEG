@@ -5,25 +5,30 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.ListView;
-
-import org.json.JSONArray;
-import org.json.JSONException;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.util.HashMap;
+import org.json.JSONArray;
+import org.json.JSONException;
 
-import jackgoza.riseandread.models.JumpItem;
+import java.util.ArrayList;
 
 import jackgoza.riseandread.R;
+import jackgoza.riseandread.models.CustomAdapter;
+import jackgoza.riseandread.models.JumpItem;
+
+import static jackgoza.riseandread.models.JumpItem.appOrWebsite.MOBILE_APPLICATION;
+import static jackgoza.riseandread.models.JumpItem.appOrWebsite.WEBSITE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,16 +40,15 @@ import jackgoza.riseandread.R;
  */
 public class PageRight extends Fragment {
 
-    private static ListView listHolder;
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private static JumpItem jumpItemArray;
-    private static HashMap<String,String> linkHash = new HashMap<>();
+    private static ArrayList<JumpItem> jumpItemArray;
     private static String[] displayArray = {"NYT", "CNET", "Gizmodo", "Imgur"};
-    private static String[] linkArray = {"www.nytimes.com", "www.cnet.com", "www.gizmodo.com", "Imgur"};
-
+    private static String[] linkArray = {"www.nytimes.com", "www.cnet.com", "www.gizmodo.com", "com.imgur.mobile"};
+    private static JumpItem.appOrWebsite[] typeArray = {WEBSITE, WEBSITE, WEBSITE, MOBILE_APPLICATION};
+    private static int[] images = {R.mipmap.nyt, R.mipmap.cnet, R.mipmap.gizmodo, R.mipmap.imgur};
+    private ListView listHolder;
+    private FloatingActionButton fab;
     // TODO: Rename and change types of parameters
-    private String mParam1;
+    private JSONArray savedData;
 
     private OnFragmentInteractionListener mListener;
 
@@ -53,21 +57,12 @@ public class PageRight extends Fragment {
     }
 
 
-    public static PageRight newInstance(JSONArray jsonArray) {
+    public static PageRight newInstance(JSONArray startingData) {
         PageRight fragment = new PageRight();
         Bundle args = new Bundle();
-        if(jsonArray == null){
-            jsonArray = new JSONArray();
-            for (int i =0; i < displayArray.length; i++){
-                linkHash.put(displayArray[i],linkArray[i]);
-            }
+        if (startingData != null) {
+            args.putString("jsonarray", startingData.toString());
         }
-        else{
-            linkHash = new Gson().fromJson(
-                    jsonArray.toString(), new TypeToken<HashMap<String, String>>() {}.getType()
-            );
-        }
-        args.putString(ARG_PARAM1, jsonArray.toString());
         fragment.setArguments(args);
         return fragment;
     }
@@ -75,15 +70,15 @@ public class PageRight extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+        if (getArguments() != null && getArguments().getString("jsonarray") != null) {
             try {
-                mParam1 = getArguments().getString(ARG_PARAM1);
-                JSONArray jsonArray = new JSONArray(mParam1);
+                savedData = new JSONArray(getArguments().getString("jsonarray"));
             } catch (JSONException e) {
-                Log.e(e.toString(),e.getMessage());
-                throw new RuntimeException("JSON borked. Way to serialize bro.");
+                Log.e("ERROR", "bad onCreate jsonarray creation", e);
+                throw new RuntimeException(e);
             }
         }
+        jumpArrayMaker();
 
     }
 
@@ -93,10 +88,33 @@ public class PageRight extends Fragment {
         View pageRightView = inflater.inflate(R.layout.fragment_page_right, container, false);
 
         listHolder = (ListView) pageRightView.findViewById(R.id.listHolder);
-        ArrayAdapter adapter = new ArrayAdapter<>(this.getContext(),
-                R.layout.fragment_page_right, R.id.listText, displayArray);
+        CustomAdapter adapter = new CustomAdapter(this.getContext(),
+                displayArray, images);
         listHolder.setAdapter(adapter);
+        listHolder.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                JumpItem jumper = jumpItemArray.get(position);
+                if (jumper.getItemType() == WEBSITE) {
+                    launchWebsite(jumper.getJumpURI());
+                } else if (jumper.getItemType() == MOBILE_APPLICATION) {
+                    boolean launched = launchThirdPartyApp(getContext(), jumper.getJumpURI());
+                    if (!launched) {
+                        Toast.makeText(getContext(), "App not found", Toast.LENGTH_LONG);
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Bad link! Please reconfigure", Toast.LENGTH_LONG);
+                }
+            }
+        });
 
+        fab = (FloatingActionButton) pageRightView.findViewById(R.id.addShortcutButton);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
 
         // Inflate the layout for this fragment
         return pageRightView;
@@ -124,13 +142,15 @@ public class PageRight extends Fragment {
 
     private void launchWebsite(String url) {
 
+        if (!url.startsWith("http://") && !url.startsWith("https://"))
+            url = "http://" + url;
 
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 
         startActivity(browserIntent);
     }
 
-    public boolean launchThirdPartyApp(Context context, String packageName) {
+    private boolean launchThirdPartyApp(Context context, String packageName) {
         PackageManager manager = context.getPackageManager();
         try {
             Intent i = manager.getLaunchIntentForPackage(packageName);
@@ -142,16 +162,31 @@ public class PageRight extends Fragment {
             context.startActivity(i);
             return true;
         } catch (PackageManager.NameNotFoundException e) {
+            Toast.makeText(getContext().getApplicationContext(), "Link not found! App Installed?", Toast.LENGTH_SHORT);
             return false;
 
         }
     }
+
+    private void jumpArrayMaker() {
+        if (savedData != null) {
+            jumpItemArray = new Gson().fromJson(savedData.toString(), new TypeToken<ArrayList<JumpItem>>() {
+            }.getType());
+        } else {
+            jumpItemArray = new ArrayList<>();
+            for (int i = 0; i < displayArray.length; i++) {
+                jumpItemArray.add(new JumpItem(displayArray[i], linkArray[i], typeArray[i]));
+            }
+        }
+    }
+
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
+
 
     /**
      * This interface must be implemented by activities that contain this

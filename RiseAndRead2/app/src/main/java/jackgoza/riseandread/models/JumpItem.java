@@ -1,15 +1,19 @@
 package jackgoza.riseandread.models;
 
-import java.util.Objects;
-
 /**
  * Created by jackg on 3/5/2017.
  */
 
 public class JumpItem {
     private String prettyName;
-    private String weblinkURI;
-    private String applinkURI;
+    private String jumpURI;
+    private appOrWebsite itemType;
+
+    public JumpItem(String pName, String link, appOrWebsite type) {
+        this.prettyName = pName;
+        this.jumpURI = link;
+        this.itemType = type;
+    }
 
     public String getPrettyName() {
         return prettyName;
@@ -20,21 +24,21 @@ public class JumpItem {
         return this;
     }
 
-    public String getWeblinkURI() {
-        return weblinkURI;
+    public String getJumpURI() {
+        return jumpURI;
     }
 
-    public JumpItem setWeblinkURI(String weblinkURI) {
-        this.weblinkURI = weblinkURI;
+    public JumpItem setJumpURI(String jumpURI) {
+        this.jumpURI = jumpURI;
         return this;
     }
 
-    public String getApplinkURI() {
-        return applinkURI;
+    public appOrWebsite getItemType() {
+        return itemType;
     }
 
-    public JumpItem setApplinkURI(String applinkURI) {
-        this.applinkURI = applinkURI;
+    public JumpItem setItemType(appOrWebsite itemType) {
+        this.itemType = itemType;
         return this;
     }
 
@@ -42,14 +46,35 @@ public class JumpItem {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         JumpItem jumpItem = (JumpItem) o;
-        return Objects.equals(prettyName, jumpItem.prettyName) &&
-                Objects.equals(weblinkURI, jumpItem.weblinkURI) &&
-                Objects.equals(applinkURI, jumpItem.applinkURI);
+
+        if (prettyName != null ? !prettyName.equals(jumpItem.prettyName) : jumpItem.prettyName != null)
+            return false;
+        if (jumpURI != null ? !jumpURI.equals(jumpItem.jumpURI) : jumpItem.jumpURI != null)
+            return false;
+        return itemType == jumpItem.itemType;
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(prettyName, weblinkURI, applinkURI);
+        int result = prettyName != null ? prettyName.hashCode() : 0;
+        result = 31 * result + (jumpURI != null ? jumpURI.hashCode() : 0);
+        result = 31 * result + (itemType != null ? itemType.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "JumpItem{" +
+                "prettyName='" + prettyName + '\'' +
+                ", jumpURI='" + jumpURI + '\'' +
+                ", itemType=" + itemType +
+                '}';
+    }
+
+    public enum appOrWebsite {
+        MOBILE_APPLICATION, WEBSITE;
     }
 }
