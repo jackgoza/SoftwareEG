@@ -3,6 +3,7 @@ package jackgoza.riseandread.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.mvc.imagepicker.ImagePicker;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,8 +80,16 @@ public class PageRight extends Fragment {
                 throw new RuntimeException(e);
             }
         }
+        ImagePicker.setMinQuality(600, 600);
+
         jumpArrayMaker();
 
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Bitmap bitmap = ImagePicker.getImageFromResult(getContext(), requestCode, resultCode, data);
+        // TODO do something with the bitmap
     }
 
     @Override
@@ -112,7 +122,9 @@ public class PageRight extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if(mListener != null){
+                    mListener.onPageRightInteraction();
+                }
             }
         });
 
@@ -120,14 +132,11 @@ public class PageRight extends Fragment {
         return pageRightView;
     }
 
-    /*
-    // TODO: Rename method, update argument and hook method into UI event
+
     public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+        ImagePicker.pickImage(this, "Select your image:");
     }
-    */
+
 
     @Override
     public void onAttach(Context context) {
@@ -199,7 +208,6 @@ public class PageRight extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onPageRightInteraction(Uri uri);
+        void onPageRightInteraction();
     }
 }

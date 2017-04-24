@@ -1,5 +1,6 @@
 package jackgoza.riseandread;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -14,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +32,7 @@ import java.util.Calendar;
 import jackgoza.riseandread.fragments.AlarmFragment;
 import jackgoza.riseandread.fragments.PageRight;
 import jackgoza.riseandread.fragments.PlaceholderFragment;
+import jackgoza.riseandread.fragments.WelcomeFragment;
 
 public class MainActivity extends AppCompatActivity implements AlarmFragment.OnFragmentInteractionListener,
         PageRight.OnFragmentInteractionListener {
@@ -119,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setCurrentItem(1);
 
 
     }
@@ -159,15 +163,28 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
             Intent myIntent = new Intent(MainActivity.this, AlarmReceiver.class);
             pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            Toast.makeText(getApplicationContext(), "Alarm set for " + calendar.get(Calendar.HOUR) + ":" +
+                    calendar.get(Calendar.MINUTE), Toast.LENGTH_SHORT).show();
+
         } else {
             alarmManager.cancel(pendingIntent);
             Log.d("MyActivity", "Alarm Off");
+            Toast.makeText(getApplicationContext(), "Alarm turned off!", Toast.LENGTH_SHORT).show();
         }
 
     }
 
-    public void onPageRightInteraction(Uri uri) {
-        return;
+    public void onPageRightInteraction() {
+        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        getIntent.setType("image/*");
+
+        Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickIntent.setType("image/*");
+
+        Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
+
+        startActivityForResult(chooserIntent, 1);
     }
 
 
@@ -180,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
         AlarmFragment alarmFragment = AlarmFragment.newInstance(null, null);
         PlaceholderFragment placeHolder = PlaceholderFragment.newInstance(3);
         private JSONArray linkArray;
+        WelcomeFragment welcomeFragment = WelcomeFragment.newInstance();
         PageRight pageRight = PageRight.newInstance(linkArray);
 
         public SectionsPagerAdapter(FragmentManager fm, JSONArray inputArray) {
@@ -195,6 +213,8 @@ public class MainActivity extends AppCompatActivity implements AlarmFragment.OnF
                 case 0:
                     return alarmFragment;
                 case 1:
+                    return welcomeFragment;
+                case 2:
                     return pageRight;
                 default:
                     return placeHolder;
